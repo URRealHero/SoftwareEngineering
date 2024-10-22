@@ -1,0 +1,346 @@
+<template>
+  <div :class="['main-container', isDarkMode ? 'dark' : 'light']">
+    <!-- 左侧可伸缩导航栏 -->
+    <div
+        class="sidebar"
+        :class="{ collapsed: isSidebarCollapsed }"
+        @mouseenter="expandSidebar"
+        @mouseleave="collapseSidebar"
+    >
+      <!-- Logo 放在最上方，放大尺寸 -->
+      <div class="logo">
+        <img src="@/assets/gocloud.svg" alt="Logo" class="logo-image" />
+      </div>
+
+      <!-- 用户信息：头像和用户名，头像居中，用户名在头像下方 -->
+      <div class="user-info">
+        <div class="avatar-wrapper">
+          <img class="avatar" src="@/assets/gocloud.png" alt="User Avatar" />
+        </div>
+        <span class="username" v-if="!isSidebarCollapsed">John Doe</span>
+      </div>
+
+      <!-- 导航栏选项 -->
+      <ul class="nav-menu">
+        <li @click="setActivePage('home')" :class="{ active: activePage === 'home' }">
+          <i class="icon">🏠</i>
+          <span v-if="!isSidebarCollapsed">主页</span>
+        </li>
+        <li @click="setActivePage('myDrive')" :class="{ active: activePage === 'myDrive' }">
+          <i class="icon">💼</i>
+          <span v-if="!isSidebarCollapsed">我的网盘</span>
+        </li>
+        <li @click="setActivePage('upload')" :class="{ active: activePage === 'upload' }">
+          <i class="icon">⬆️</i>
+          <span v-if="!isSidebarCollapsed">上传</span>
+        </li>
+        <li @click="setActivePage('categories')" :class="{ active: activePage === 'categories' }">
+          <i class="icon">📂</i>
+          <span v-if="!isSidebarCollapsed">分类</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 右侧内容区域 -->
+    <div class="content">
+      <!-- Dashboard 页面 -->
+      <div v-if="activePage === 'home'" class="dashboard">
+        <h2>Dashboard</h2>
+        <div class="dashboard-content">
+          <!-- 存储使用图表 -->
+          <div class="chart-container">
+            <canvas id="fileTypeChart"></canvas>
+          </div>
+          <!-- 文件类型图表 -->
+          <div class="chart-container">
+            <canvas id="storageUsageChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- 其他页面内容 -->
+      <div v-if="activePage === 'myDrive'">
+        <h2>My Drive</h2>
+        <p>Your files and folders appear here.</p>
+      </div>
+      <div v-if="activePage === 'upload'">
+        <h2>Upload Files</h2>
+        <input type="file" />
+      </div>
+      <div v-if="activePage === 'categories'">
+        <h2>Categories</h2>
+        <p>View files by category.</p>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { ref, onMounted } from 'vue';
+import { Chart, DoughnutController, ArcElement, Tooltip, Legend } from 'chart.js';
+
+// 注册 Chart.js 组件
+Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
+
+// 导航栏折叠状态
+const isSidebarCollapsed = ref(true);
+
+// 当前活跃页面
+const activePage = ref('home');
+
+// 鼠标进入时展开导航栏
+const expandSidebar = () => {
+  isSidebarCollapsed.value = false;
+};
+
+// 鼠标离开时收缩导航栏
+const collapseSidebar = () => {
+  isSidebarCollapsed.value = true;
+};
+
+// 设置当前页面
+const setActivePage = (page: string) => {
+  activePage.value = page;
+};
+
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+Chart.register(ChartDataLabels);
+
+// 图表的绘制逻辑
+onMounted(() => {
+  // 第一个甜甜圈图：文件类型占用比例
+  const fileTypeCtx = document.getElementById('fileTypeChart').getContext('2d');
+  new Chart(fileTypeCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['文档', '图片', '视频', '其他'],
+      datasets: [{
+        data: [12, 20, 38, 30],
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.8)',
+          'rgba(54, 162, 235, 0.8)',
+          'rgba(75, 192, 192, 0.8)',
+          'rgba(153, 102, 255, 0.8)',
+        ],
+        hoverBackgroundColor: [
+          'rgba(255, 99, 132, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)',
+        ],
+        borderColor: '#fff',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: false, // 隐藏图例
+        },
+        tooltip: {
+          enabled: false, // 禁用鼠标悬停工具提示
+        },
+        datalabels: {
+          color: '#fff',
+          font: {
+            size: 16,
+            weight: 'bold',
+          },
+          textShadowColor: 'rgba(0, 0, 0, 0.7)', // 添加文字阴影
+          textShadowBlur: 4,
+          formatter: (value, ctx) => {
+            let label = ctx.chart.data.labels[ctx.dataIndex];
+            return `${label}\n${value}%`; // 显示文件类型和百分比
+          },
+        },
+      },
+      cutout: '60%',
+      animation: {
+        animateRotate: true,
+        animateScale: true,
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+
+  // 第二个甜甜圈图：存储使用率
+  const storageUsageCtx = document.getElementById('storageUsageChart').getContext('2d');
+  new Chart(storageUsageCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['已用', '空闲'],
+      datasets: [{
+        data: [65, 35],
+        backgroundColor: [
+          'rgba(255, 159, 64, 0.8)',
+          'rgba(75, 192, 192, 0.8)',
+        ],
+        hoverBackgroundColor: [
+          'rgba(255, 159, 64, 1)',
+          'rgba(75, 192, 192, 1)',
+        ],
+        borderColor: '#fff',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: false, // 隐藏图例
+        },
+        tooltip: {
+          enabled: false, // 禁用鼠标悬停工具提示
+        },
+        datalabels: {
+          color: '#fff',
+          font: {
+            size: 16,
+            weight: 'bold',
+          },
+          textShadowColor: 'rgba(0, 0, 0, 0.7)', // 添加文字阴影
+          textShadowBlur: 4,
+          formatter: (value, ctx) => {
+            let label = ctx.chart.data.labels[ctx.dataIndex];
+            return `${label}\n${value}%`; // 显示存储状态和百分比
+          },
+        },
+      },
+      cutout: '60%',
+      animation: {
+        animateRotate: true,
+        animateScale: true,
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+});
+
+</script>
+
+<style scoped>
+/* 全局容器 */
+.main-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background-color: #f0f2f5;
+  overflow: hidden; /* 确保内容不会溢出 */
+}
+
+/* 导航栏 */
+.sidebar {
+  background-color: #3a3f51;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  width: 20vw; /* 使用百分比宽度代替固定宽度 */
+  transition: width 0.3s;
+  overflow: hidden;
+}
+
+.sidebar.collapsed {
+  width: 5vw; /* 折叠后更窄的宽度 */
+}
+
+/* Logo 样式，放大尺寸 */
+.logo {
+  margin-bottom: 20px;
+}
+
+.logo-image {
+  width: 150px; /* 放大宽度 */
+  height: 80px; /* 放大高度 */
+}
+
+/* 用户信息：头像居中，名称在头像下方 */
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+/* 头像部分：头像放大并加圆形边框 */
+.avatar-wrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid #ffffff; /* 边框 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.user-info .avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}yDriv
+
+.username {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.nav-menu {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+}
+
+.nav-menu li {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.nav-menu li.active {
+  background-color: #555a71;
+}
+
+.nav-menu li:hover {
+  background-color: #555a71;
+}
+
+.nav-menu li .icon {
+  margin-right: 10px;
+}
+
+/* 右侧内容区域 */
+.content {
+  flex-grow: 1;
+  padding: 20px;
+  background-color: #ffffff;
+}
+
+.dashboard-content {
+  display: flex;
+  justify-content: space-evenly; /* 居中对齐两个图表 */
+  padding: 20px;
+  background-color: #eef2f5;
+  border-radius: 12px;
+}
+
+.chart-container {
+  width: 45%;
+}
+
+.storage-info {
+  background-color: #d0e2ff;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.file-category {
+  background-color: #c8e6c9;
+  padding: 20px;
+  border-radius: 8px;
+}
+</style>

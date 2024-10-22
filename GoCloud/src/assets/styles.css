@@ -1,0 +1,13 @@
+/* src/assets/styles.css */
+
+body.dark-mode {
+  background-color: #1e1e1e;
+  color: #ffffff;
+}
+
+body.light-mode {
+  background-color: #f0f2f5;
+  color: #000000;
+}
+
+/* Additional global styles */
