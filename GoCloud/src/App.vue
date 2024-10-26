@@ -1,4 +1,3 @@
-<!-- src/App.vue -->
 <template>
   <div :class="['main-container', isDarkMode ? 'dark' : 'light']">
     <NavBar :isDarkMode="isDarkMode" @toggle-theme="toggleTheme" />
@@ -27,13 +26,15 @@ const toggleTheme = () => {
   overflow: hidden;
 }
 
+/* Dark Mode: Deep Blue */
 .main-container.dark {
-  background-color: #1e1e1e;
+  background-color: #1a2a4e; /* Deep blue background for dark mode */
   color: #ffffff;
 }
 
+/* Light Mode: Light Blue */
 .main-container.light {
-  background-color: #f0f2f5;
+  background-color: #e6f7ff; /* Really light blue background for light mode */
   color: #000000;
 }
 

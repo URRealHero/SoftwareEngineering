@@ -1,4 +1,3 @@
-<!-- src/components/NavBar.vue -->
 <template>
   <div
     class="sidebar"
@@ -8,7 +7,7 @@
   >
     <!-- Theme Toggle Button at the Top Right -->
     <div class="theme-toggle" @click="toggleTheme">
-      <i class="icon">{{ isDarkMode ? '🌞' : '🌙' }}</i>
+      <font-awesome-icon :icon="isDarkMode ? 'sun' : 'moon'" class="icon" />
     </div>
 
     <!-- Logo -->
@@ -17,46 +16,37 @@
     </div>
 
     <!-- User Info (clickable, navigates to settings) -->
-    <div class="user-info" @click="navigateTo('/settings')">
+    <div class="user-info" v-if="!isSidebarCollapsed" @click="navigateTo('/settings')">
       <div class="avatar-wrapper">
         <img :src="avatar" alt="User Avatar" class="avatar" />
       </div>
-      <span class="username" v-if="!isSidebarCollapsed">John Doe</span>
+      <span class="username">John Doe</span>
     </div>
 
     <!-- Navigation Menu -->
-    <ul class="nav-menu">
+    <ul class="nav-menu" v-if="!isSidebarCollapsed">
       <li :class="{ active: isActive('/') }" @click="navigateTo('/')">
-        <i class="icon">🏠</i>
-        <span v-if="!isSidebarCollapsed">主页</span>
+        <font-awesome-icon icon="home" class="icon" />
+        <span>主页</span>
       </li>
-      <li
-        :class="{ active: isActive('/my-drive') }"
-        @click="navigateTo('/my-drive')"
-      >
-        <i class="icon">💼</i>
-        <span v-if="!isSidebarCollapsed">我的网盘</span>
+      <li :class="{ active: isActive('/my-drive') }" @click="navigateTo('/my-drive')">
+        <font-awesome-icon icon="briefcase" class="icon" />
+        <span>我的网盘</span>
       </li>
-      <li
-        :class="{ active: isActive('/upload') }"
-        @click="navigateTo('/upload')"
-      >
-        <i class="icon">⬆️</i>
-        <span v-if="!isSidebarCollapsed">上传</span>
+      <li :class="{ active: isActive('/upload') }" @click="navigateTo('/upload')">
+        <font-awesome-icon icon="cloud-upload-alt" class="icon" />
+        <span>上传</span>
       </li>
-      <li
-        :class="{ active: isActive('/categories') }"
-        @click="navigateTo('/categories')"
-      >
-        <i class="icon">📂</i>
-        <span v-if="!isSidebarCollapsed">分类</span>
+      <li :class="{ active: isActive('/categories') }" @click="navigateTo('/categories')">
+        <font-awesome-icon icon="folder" class="icon" />
+        <span>分类</span>
       </li>
     </ul>
 
     <!-- Log Out Button at the Bottom -->
-    <div class="logout-button" @click="logout">
-      <i class="icon">🚪</i>
-      <span v-if="!isSidebarCollapsed">退出</span>
+    <div class="logout-button" v-if="!isSidebarCollapsed" @click="logout">
+      <font-awesome-icon icon="sign-out-alt" class="icon" />
+      <span>退出</span>
     </div>
   </div>
 </template>
@@ -104,8 +94,6 @@ const toggleTheme = () => {
 
 // Log out function
 const logout = () => {
-  // Implement your logout logic here
-  // For example, clear user data and redirect to login page
   console.log('Logging out...')
   router.push('/login')
 }
@@ -115,19 +103,19 @@ const logout = () => {
 /* Sidebar styles */
 .sidebar {
   position: relative;
-  background-color: #3a3f51;
+  background-color: #2f323a;
   color: #ffffff;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 20px;
-  width: 200px; /* Fixed width */
-  transition: width 0.3s;
+  width: 200px;
+  transition: width 0.3s, opacity 0.3s;
   overflow: hidden;
 }
 
 .sidebar.collapsed {
-  width: 60px; /* Adjusted collapsed width */
+  width: 60px;
 }
 
 /* Theme Toggle Button at the Top Right */
@@ -140,6 +128,7 @@ const logout = () => {
 
 .theme-toggle .icon {
   font-size: 1.5em;
+  color: #ffffff;
 }
 
 /* Logo styles */
@@ -148,12 +137,11 @@ const logout = () => {
 }
 
 .logo-image {
-  width: 80px; /* Increased width */
-  height: auto;
+  width: 60px;
 }
 
 .sidebar.collapsed .logo-image {
-  width: 60px; /* Adjusted collapsed width */
+  width: 40px;
 }
 
 /* User Info styles */
@@ -216,15 +204,17 @@ const logout = () => {
 }
 
 .nav-menu li.active {
-  background-color: #555a71;
+  background-color: #444a56;
 }
 
 .nav-menu li:hover {
-  background-color: #555a71;
+  background-color: #444a56;
 }
 
 .nav-menu li .icon {
   margin-right: 10px;
+  font-size: 1.5em;
+  color: #ffffff;
 }
 
 .sidebar.collapsed .nav-menu li span {
@@ -243,11 +233,13 @@ const logout = () => {
 }
 
 .logout-button:hover {
-  background-color: #555a71;
+  background-color: #444a56;
 }
 
 .logout-button .icon {
   margin-right: 10px;
+  font-size: 1.5em;
+  color: #ffffff;
 }
 
 .sidebar.collapsed .logout-button span {
