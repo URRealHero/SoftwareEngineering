@@ -24,29 +24,59 @@
     </div>
 
     <!-- Navigation Menu -->
-    <ul class="nav-menu" v-if="!isSidebarCollapsed">
+    <ul class="nav-menu">
+      <!-- Home -->
       <li :class="{ active: isActive('/') }" @click="navigateTo('/')">
         <font-awesome-icon icon="home" class="icon" />
-        <span>主页</span>
+        <span v-if="!isSidebarCollapsed">主页</span>
       </li>
+      <!-- My Drive -->
       <li :class="{ active: isActive('/my-drive') }" @click="navigateTo('/my-drive')">
         <font-awesome-icon icon="briefcase" class="icon" />
-        <span>我的网盘</span>
+        <span v-if="!isSidebarCollapsed">我的网盘</span>
       </li>
+      <!-- Upload -->
       <li :class="{ active: isActive('/upload') }" @click="navigateTo('/upload')">
         <font-awesome-icon icon="cloud-upload-alt" class="icon" />
-        <span>上传</span>
+        <span v-if="!isSidebarCollapsed">上传</span>
       </li>
-      <li :class="{ active: isActive('/categories') }" @click="navigateTo('/categories')">
-        <font-awesome-icon icon="folder" class="icon" />
-        <span>分类</span>
+      <!-- Categories Dropdown -->
+      <li class="dropdown">
+        <div class="dropdown-toggle" @click="toggleDropdown">
+          <font-awesome-icon icon="folder" class="icon" />
+          <span v-if="!isSidebarCollapsed">分类</span>
+          <font-awesome-icon icon="chevron-down" class="chevron" v-if="!isSidebarCollapsed" />
+        </div>
+        <!-- Dropdown Menu Shown Only When "分类" Button is Clicked -->
+        <ul class="dropdown-menu" v-if="showDropdown && !isSidebarCollapsed">
+          <li @click="navigateTo('/categories/docs')">
+            <font-awesome-icon icon="file-alt" class="icon" />
+            <span>文档</span>
+          </li>
+          <li @click="navigateTo('/categories/images')">
+            <font-awesome-icon icon="file-image" class="icon" />
+            <span>图片</span>
+          </li>
+          <li @click="navigateTo('/categories/videos')">
+            <font-awesome-icon icon="file-video" class="icon" />
+            <span>视频</span>
+          </li>
+          <li @click="navigateTo('/categories/audios')">
+            <font-awesome-icon icon="file-audio" class="icon" />
+            <span>音频</span>
+          </li>
+          <li @click="navigateTo('/categories/others')">
+            <font-awesome-icon icon="file" class="icon" />
+            <span>其他</span>
+          </li>
+        </ul>
       </li>
     </ul>
 
     <!-- Log Out Button at the Bottom -->
-    <div class="logout-button" v-if="!isSidebarCollapsed" @click="logout">
+    <div class="logout-button" @click="logout">
       <font-awesome-icon icon="sign-out-alt" class="icon" />
-      <span>退出</span>
+      <span v-if="!isSidebarCollapsed">退出</span>
     </div>
   </div>
 </template>
@@ -56,6 +86,39 @@ import { ref, defineProps, defineEmits } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import logo from '@/assets/gocloud.svg'
 import avatar from '@/assets/gocloud.png'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import {
+  faSun,
+  faMoon,
+  faHome,
+  faBriefcase,
+  faCloudUploadAlt,
+  faFolder,
+  faChevronDown,
+  faFileAlt,
+  faFileImage,
+  faFileVideo,
+  faFileAudio,
+  faFile,
+  faSignOutAlt,
+} from '@fortawesome/free-solid-svg-icons'
+
+library.add(
+  faSun,
+  faMoon,
+  faHome,
+  faBriefcase,
+  faCloudUploadAlt,
+  faFolder,
+  faChevronDown,
+  faFileAlt,
+  faFileImage,
+  faFileVideo,
+  faFileAudio,
+  faFile,
+  faSignOutAlt
+)
 
 const props = defineProps({
   isDarkMode: {
@@ -67,6 +130,7 @@ const props = defineProps({
 const emit = defineEmits(['toggle-theme'])
 
 const isSidebarCollapsed = ref(true)
+const showDropdown = ref(false) // Manage dropdown visibility
 
 const expandSidebar = () => {
   isSidebarCollapsed.value = false
@@ -74,6 +138,12 @@ const expandSidebar = () => {
 
 const collapseSidebar = () => {
   isSidebarCollapsed.value = true
+  showDropdown.value = false
+}
+
+// Toggle dropdown visibility on click
+const toggleDropdown = () => {
+  showDropdown.value = !showDropdown.value
 }
 
 const router = useRouter()
@@ -196,6 +266,7 @@ const logout = () => {
 }
 
 .nav-menu li {
+  position: relative;
   display: flex;
   align-items: center;
   padding: 15px;
@@ -217,7 +288,62 @@ const logout = () => {
   color: #ffffff;
 }
 
+.sidebar.collapsed .nav-menu li .icon {
+  margin-right: 0;
+}
+
 .sidebar.collapsed .nav-menu li span {
+  display: none;
+}
+
+/* Dropdown Menu Styles */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-toggle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.dropdown-toggle .chevron {
+  margin-left: auto;
+  font-size: 1em;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #2f323a;
+  width: 150px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  z-index: 1;
+}
+
+.dropdown-menu li {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  font-size: 0.85em;
+  cursor: pointer;
+}
+
+.dropdown-menu li:hover {
+  background-color: #444a56;
+}
+
+.dropdown-menu li .icon {
+  margin-right: 10px;
+  font-size: 1.2em;
+  color: #ffffff;
+}
+
+/* Adjustments for collapsed sidebar */
+.sidebar.collapsed .dropdown-menu {
   display: none;
 }
 
@@ -240,6 +366,10 @@ const logout = () => {
   margin-right: 10px;
   font-size: 1.5em;
   color: #ffffff;
+}
+
+.sidebar.collapsed .logout-button .icon {
+  margin-right: 0;
 }
 
 .sidebar.collapsed .logout-button span {

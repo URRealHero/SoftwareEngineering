@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import MyDrive from '../views/MyDrive.vue'
 import Upload from '../views/Upload.vue'
-import Categories from '../views/Categories/Categories.vue'
+import Categories from '../views/Categories/Categories.vue' // Line 6
 import Docs from '../views/Categories/Docs.vue'
 import Images from '../views/Categories/Images.vue'
 import Videos from '../views/Categories/Videos.vue'
@@ -18,7 +18,7 @@ const routes = [
   {
     path: '/categories',
     name: 'Categories',
-    component: Categories,
+    component: Categories, // Line 21
     children: [
       { path: 'docs', name: 'Docs', component: Docs },
       { path: 'images', name: 'Images', component: Images },
